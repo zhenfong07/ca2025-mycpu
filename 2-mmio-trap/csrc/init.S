@@ -47,18 +47,34 @@ bss_clear_done:
 loop:
   wfi
   j loop
+
+# ==============================================================================
+# CSR (Control and Status Register) Operations
+# ==============================================================================
+# Best Practices:
+#   - csrs/csrsi: Set specific bits (read-modify-write, preserves other bits)
+#   - csrc/csrci: Clear specific bits (read-modify-write, preserves other bits)
+#   - csrw/csrrw: Full register write (use only when controlling entire register)
+#   - Avoid magic numbers - use explicit bit shifts for clarity
+#   - Preserve reserved bits per RISC-V Privileged Spec (WARL contract)
+# ==============================================================================
+
 .globl enable_interrupt
 enable_interrupt:
   la t0, __trap_entry
   csrrw t1, mtvec, t0      # setup trap vector base
-  li t0, 0x1888
-  csrrw t1, mstatus, t0    # enable interrupt (set MIE bit)
+  li t0, (1 << 3)          # MIE bit (Machine Interrupt Enable)
+  csrs mstatus, t0         # set MIE without clobbering other bits
   li t0, (1 << 7) | (1 << 11)  # MTIE (bit 7) | MEIE (bit 11)
   csrs mie, t0             # enable timer + external interrupts
   ret
 .globl enable_paging
 enable_paging:
-  li t0, 0x80000005 # ppn << 12 = 0x005000
+  # SATP (Supervisor Address Translation and Protection)
+  # Bits [31]: MODE = 1 (Sv32 paging enabled)
+  # Bits [30:22]: ASID = 0 (Address Space ID)
+  # Bits [21:0]: PPN = 0x00005 (Physical Page Number, ppn << 12 = 0x5000)
+  li t0, 0x80000005
   csrw satp, t0
   ret
 .globl get_mtval
@@ -71,7 +87,7 @@ get_epc:
   csrr a0, mepc
   ret
 .weak trap_handler
-tran_handler:
+trap_handler:
   ret
 __trap_entry:
   csrw mscratch, sp
