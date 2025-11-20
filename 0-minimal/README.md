@@ -68,6 +68,14 @@ Immediate extraction supports three encoding formats: I-type (12-bit sign-extend
 The design eliminates funct3/funct7 field decoding since all five operations are uniquely determined by opcode alone.
 B-type (branch) and J-type (jump) encodings are not required for this minimal instruction subset.
 
+### Harvard Architecture Memory
+- Separate instruction and data memories for FPGA block RAM synthesis
+- imem: Instruction memory (1 read port for instruction fetch)
+- dmem: Data memory (1 read + 1 write port for load/store)
+- JIT Support: Synchronized writes to both memories enable self-modifying code
+- FPGA-Ready: Maps cleanly to dual-port block RAM (no multi-port conflicts)
+- Trade-off: 2× memory capacity (imem + dmem) vs. synthesizable design
+
 ## Test Program: jit.asmbin
 
 ### What jit.asmbin Does
@@ -213,7 +221,7 @@ The analysis script uses only Python standard library without external dependenc
 │   │   │   ├── RegisterFile.scala        # 32 registers
 │   │   │   └── CPU.scala                 # Top CPU module
 │   │   └── peripheral/
-│   │       ├── Memory.scala              # Unified instruction/data memory
+│   │       ├── Memory.scala              # Harvard architecture (imem + dmem)
 │   │       ├── InstructionROM.scala      # Instruction loader
 │   │       └── ROMLoader.scala           # ROM → Memory loader
 │   ├── board/
