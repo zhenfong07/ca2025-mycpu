@@ -10,19 +10,21 @@
 
 #include "VTop.h"  // From Verilating "top.v"
 
-
 class Memory
 {
     std::vector<uint32_t> memory;
 
 public:
+    // Mở rộng bộ nhớ lên 256MB để tránh lỗi Stack Pointer (sp) vượt quá giới hạn 4MB cũ
+    // 64 * 1024 * 1024 words = 256MB
     Memory(size_t size) : memory(size, 0) {}
 
     uint32_t read(size_t address)
     {
         address = address / 4;
         if (address >= memory.size()) {
-            printf("invalid read address 0x%08x\n", address * 4);
+            // SỬA LỖI 1: Đổi %08x thành %08lx để khớp với size_t trên máy 64-bit
+            printf("invalid read address 0x%08lx\n", address * 4);
             return 0;
         }
         return memory[address];
@@ -32,7 +34,8 @@ public:
     {
         address = address / 4;
         if (address >= memory.size()) {
-            printf("invalid read Inst address 0x%08x\n", address * 4);
+            // SỬA LỖI 2: Đổi %08x thành %08lx
+            printf("invalid read Inst address 0x%08lx\n", address * 4);
             return 0;
         }
 
@@ -52,7 +55,8 @@ public:
         if (write_strobe[3])
             write_mask |= 0xFF000000;
         if (address >= memory.size()) {
-            printf("invalid write address 0x%08x\n", address * 4);
+            // SỬA LỖI 3: Đổi %08x thành %08lx
+            printf("invalid write address 0x%08lx\n", address * 4);
             return;
         }
         memory[address] =
@@ -132,7 +136,8 @@ class Simulator
     vluint64_t main_time = 0;
     vluint64_t max_sim_time = 10000;
     uint32_t halt_address = 0;
-    size_t memory_words = 1024 * 1024;  // 4MB
+    // TĂNG BỘ NHỚ: Tăng từ 4MB lên 256MB để hỗ trợ Stack Pointer ở địa chỉ cao
+    size_t memory_words = 64 * 1024 * 1024; 
     bool dump_vcd = false;
     std::unique_ptr<VTop> top;
     std::unique_ptr<VCDTracer> vcd_tracer;
