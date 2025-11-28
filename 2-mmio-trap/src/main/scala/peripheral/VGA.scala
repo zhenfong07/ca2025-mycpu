@@ -46,22 +46,22 @@ class VGA extends Module {
 
   // ============ VGA Timing Parameters ============
   // 640×480 @ 72Hz, pixel clock = 31.5 MHz
-  val H_ACTIVE = 640
-  val H_FP     = 24                              // Front porch
-  val H_SYNC   = 40                              // Sync pulse width
-  val H_BP     = 128                             // Back porch
+  val H_ACTIVE = 320
+  val H_FP     = 12                              // Front porch
+  val H_SYNC   = 20                              // Sync pulse width
+  val H_BP     = 64                             // Back porch
   val H_TOTAL  = H_ACTIVE + H_FP + H_SYNC + H_BP // 832
 
-  val V_ACTIVE = 480
-  val V_FP     = 9                               // Front porch
-  val V_SYNC   = 3                               // Sync pulse width
-  val V_BP     = 28                              // Back porch
+  val V_ACTIVE = 240
+  val V_FP     = 4                               // Front porch
+  val V_SYNC   = 2                               // Sync pulse width
+  val V_BP     = 14                              // Back porch
   val V_TOTAL  = V_ACTIVE + V_FP + V_SYNC + V_BP // 520
 
   // Display scaling and positioning (6× scaling as per design spec)
   val FRAME_WIDTH    = 64
   val FRAME_HEIGHT   = 64
-  val SCALE_FACTOR   = 6                               // 6× scaling: 64×64 → 384×384 (fits cleanly in 640×480)
+  val SCALE_FACTOR   = 3                               // 6× scaling: 64×64 → 384×384 (fits cleanly in 640×480)
   val DISPLAY_WIDTH  = FRAME_WIDTH * SCALE_FACTOR      // 64×6 = 384
   val DISPLAY_HEIGHT = FRAME_HEIGHT * SCALE_FACTOR     // 64×6 = 384
   val LEFT_MARGIN    = (H_ACTIVE - DISPLAY_WIDTH) / 2  // Horizontal center: (640-384)/2 = 128
@@ -265,9 +265,9 @@ class VGA extends Module {
     // For 10-bit input (0-1023), this gives correct results with minimal error
     // 10923/65536 = 0.166656 ≈ 1/6 (0.166667) - optimal constant for integer division
     // Extract bits [23:16] for 8-bit division result
-    val frame_x_mult = rel_x * 10923.U
+    val frame_x_mult = rel_x * 21845.U
     val frame_x_div  = frame_x_mult(23, 16)
-    val frame_y_mult = rel_y * 10923.U
+    val frame_y_mult = rel_y * 21845.U
     val frame_y_div  = frame_y_mult(23, 16)
     // Clamp to valid range [0, 63] to prevent out-of-bounds access
     // Use 8-bit division result directly, clamp will handle overflow
