@@ -39,12 +39,14 @@ game_loop:
 
     # --- FIND DISK ---
     # Disk finding logic remains unchanged as it is data-dependent
-    addi    x9, x0, 0
     andi    x6, x5, 1
+    addi    x9, x0, 0
+    #andi    x6, x5, 1
     bne     x6, x0, disk_found
     
-    addi    x9, x0, 1
     andi    x6, x5, 2
+    addi    x9, x0, 1
+    #andi    x6, x5, 2
     bne     x6, x0, disk_found
     
     addi    x9, x0, 2
@@ -54,12 +56,14 @@ disk_found:
     addi    x5, x5, 16
     add     x5, x2, x5
     lw      x18, 0(x5)          # LOAD disk position
+
     
     # Hazard Fix: Inserted Branch to avoid Load-Use Stall
     bne     x9, x0, handle_large
 
-    # Use x20 (value 3) instead of 'li x6, 3'
+ 
     addi    x19, x18, 2
+    lw x6,16(x2)
     blt     x19, x20, update_state  # Compare with x20
     sub     x19, x19, x20           # Subtract x20
     jal     x0, update_state

@@ -172,24 +172,22 @@ class PipelineProgramTest extends AnyFlatSpec with ChiselScalatestTester {
     }
     it should "solve Towers of Hanoi (Optimized)" in {
       runProgram("hanoi_opt.asmbin", cfg) { c =>
-        // 1. Cài đặt timeout lớn để tránh lỗi
+        
         c.clock.setTimeout(50000)
         
-        // 2. Thay vì vừa chạy vừa soi lệnh (gây lỗi), ta chạy mù (Blind Run)
-        // Thuật toán Hanoi 3 đĩa tốn khoảng vài nghìn cycle.
-        // Ta cho chạy dư ra là 20,000 cycle.
+        
         c.clock.step(20000)
 
         // 3. Verify kết quả
-        // Sau khi chạy xong, x8 phải bằng 8.
+        
         c.io.regs_debug_read_address.poke(8.U) 
         c.clock.step() 
         
-        // In ra để bạn yên tâm
+       
         val result = c.io.regs_debug_read_data.peek().litValue
         println(f"Hanoi Result Check: x8 = $result")
 
-        // Kiểm tra đúng sai
+        
         c.io.regs_debug_read_data.expect(8.U, "Hanoi 3 disks should finish with x8 = 8")
       }
     }
