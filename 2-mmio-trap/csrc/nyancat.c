@@ -11,6 +11,26 @@ static inline void copy_buffer(uint8_t *dest, const uint8_t *src, int n)
         dest[i] = src[i];
 }
 
+typedef unsigned long size_t;
+
+// Hàm memset: Dùng để set giá trị cho vùng nhớ (ví dụ: xóa buffer)
+void *memset(void *dest, int c, size_t n) {
+    unsigned char *p = (unsigned char *)dest;
+    while (n--) {
+        *p++ = (unsigned char)c;
+    }
+    return dest;
+}
+
+// Hàm memcpy: Dùng để copy vùng nhớ (ví dụ: copy frame cũ)
+void *memcpy(void *dest, const void *src, size_t n) {
+    unsigned char *d = (unsigned char *)dest;
+    const unsigned char *s = (const unsigned char *)src;
+    while (n--) {
+        *d++ = *s++;
+    }
+    return dest;
+}
 // VGA MMIO register addresses (base: 0x30000000)
 #define VGA_BASE 0x30000000u
 #define VGA_ID (VGA_BASE + 0x00)
@@ -40,6 +60,7 @@ static inline void copy_buffer(uint8_t *dest, const uint8_t *src, int n)
 #define OP_REPEAT_16 0x30        // Repeat (16-256) - baseline only
 #define OP_REPEAT_16_DELTA 0x40  // Repeat (16-256) - delta only
 #define OP_SKIP_64 0x50          // Skip (64-1024) - delta only
+
 
 // Nyancat color palette (6-bit RRGGBB values)
 static const uint8_t nyancat_palette[14] = {
